@@ -18,7 +18,7 @@ def create_sessions(sessions):
     files = os.listdir(interim_data_path)
     files.sort()
 
-    for file in files[:20]:
+    for file in files[:1]:
         print(
             ("-" * 10)
             + "{}".format(file)
@@ -69,76 +69,86 @@ def create_sessions(sessions):
 
     sessions = sessions[sessions["rank"].notna()].copy()
 
-
     return sessions
 
 
-def set_imdb_info(row, movie_name):
-    # create an instance of the IMDb class
-    ia = IMDb()
+def set_imdb_info(row):
+    """
+    :param row:
+    :return:
+    """
+    movie_name = row['title']
+    print("*" * 50)
+    print("Getting info about {}...".format(movie_name))
 
-    id = ia.search_movie(movie_name)[0].movieID
-    movie = ia.get_movie(id).data
+    try:
+        ia = IMDb()
+        id = ia.search_movie(movie_name)[0].movieID
+        movie = ia.get_movie(id).data
 
-    row['year'] = movie['year']
-    row['id_imdb'] = id
-    row['url'] = "https://www.imdb.com/title/tt" + id
-    row['rating'] = movie['rating']
-    row['votes'] = movie['votes']
-    row['release_date'] = movie['original air date']
-    row['genre'] = movie['genres']
-    row['main_director'] = [elem['name'] for elem in movie['director']]
-    row['directors'] = [elem['name'] for elem in movie['directors']]
-    row['main_writer'] = [elem['name'] for elem in movie['writer']]
-    row['writers'] = [elem['name'] for elem in movie['writers']]
-    row['producers'] = [elem['name'] for elem in movie['producers']]
-    row['actors'] = [elem['name'] for elem in movie['cast']]
-    row['plot'] = movie['plot']
-    row['language'] = movie['languages']
-    row['country'] = movie['countries']
-    row['production'] = movie['production companies']
-    print(movie_name)
+        standard_features = ['year', 'rating', 'votes', 'original air date', 'genres', 'plot', 'languages',
+                             'countries', 'original title', 'certificates']
+
+        features_with_name = ['director', 'writer', 'writers', 'producers', 'production companies'
+                              'cast']
+
+        row['id_imdb'] = id
+        row['url'] = "https://www.imdb.com/title/tt" + id
+
+        for feature in standard_features:
+            if feature in movie.keys():
+                row[feature] = movie[feature]
+            else:
+                row[feature] = None
+
+        for feature in features_with_name:
+            if feature in movie.keys():
+                row[feature] = [elem['name'] for elem in movie[feature] if 'name' in elem.keys()]
+            else:
+                row[feature] = []
+    except:
+        pass
+    return row
 
 
-def create_movies(df):
+def create_movies(sessions):
+    """
+    :param sessions:
+    :return:
+    """
     columns = ["title", "original_title", "year", "id_imdb", "url_imdb", "rating_imdb", "release_date",
                "genre", "rated", "director", "writer", "actors", "plot", "language", "country", "awards", "production"]
 
     movies = pd.DataFrame()
-    movies["title"] = df.title.unique()
-    print(movies.head(20))
+    movies = sessions[["title", "original_title"]].copy().drop_duplicates()
+
     # CREAR TITLE Y ORIGINAL TITLE COMO UNIQUE DEL DATAFRAME SESSIONS
     # ...
 
     # ...
 
-    # POR CADA TITLE:
-    for index, row in movies.iterrows():
-        print(row)
-        set_imdb_info(row, row['title'])
-    print(movies.head(20))
+    # POR CADA PELICULA:
+    movies = movies.apply(lambda row: set_imdb_info(row), axis=1)
 
-
-    # a = np.unique(df[["title", "original_title"]].values)
-    # print(a)
-    # movies["title"] = df.title.unique()
-    # movies["original_title"] = df.original_title.unique()
-
-    # print(df.title.unique())
-    # print("_____________________________")
-    # print(df.original_title.unique())
-
+    return movies
 
 def main():
+    """
+    :return:
+    """
     columns = [
         'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
         'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
         'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
         'amount_eur', 'spectators']
+
     sessions = pd.DataFrame(columns=columns)
 
-    df = create_sessions(sessions)
-    create_movies(df)
+    sessions = create_sessions(sessions)
+    movies = create_movies(sessions)
+
+    sessions.to_csv("sessions.csv", index=False)
+    movies.to_csv("movies.csv", index=False)
 
 
 if __name__ == "__main__":
