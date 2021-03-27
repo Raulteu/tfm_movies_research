@@ -33,7 +33,7 @@ def create_sessions(sessions):
                 'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
                 'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
                 'amount_eur', 'spectators']
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=10, cols=header)
+            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=19, cols=header)
             df['original_title'] = np.nan
             df = df.iloc[9:].copy()
         # Second Season
@@ -43,7 +43,7 @@ def create_sessions(sessions):
                 'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
                 'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
                 'amount_eur', 'spectators']
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=14, cols=header)
+            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=22, cols=header)
             df['original_title'] = np.nan
             df = df.iloc[8:].copy()
         # Third Season
@@ -65,7 +65,15 @@ def create_sessions(sessions):
                 'amount_eur', 'spectators']
             df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=16, cols=header)
 
+        df['date'] = datetime_file
         sessions = pd.concat([sessions, df])
+
+    # header = [
+    #     'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
+    #     'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
+    #     'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
+    #     'amount_eur', 'spectators']
+    # sessions = read_xlsx(os.path.join(interim_data_path, '2013-12-27.xls'), 'xls', skiprows=22, cols=header)
 
     sessions = sessions[sessions["rank"].notna()].copy()
 
@@ -77,7 +85,12 @@ def set_imdb_info(row):
     :param row:
     :return:
     """
-    movie_name = row['title']
+    if pd.isnull(row['original_title']):
+        movie_name = row['title'] + " " + row['min_date'][0:4]
+    else:
+        movie_name = row['original_title']
+
+    # movie_name = row['title']
     print("*" * 50)
     print("Getting info about {}...".format(movie_name))
 
@@ -91,7 +104,7 @@ def set_imdb_info(row):
 
         features_with_name = ['director', 'writer', 'writers', 'producers', 'production companies'
                               'cast']
-
+        row['original_title'] = movie['title']
         row['id_imdb'] = id
         row['url'] = "https://www.imdb.com/title/tt" + id
 
@@ -108,6 +121,7 @@ def set_imdb_info(row):
                 row[feature] = []
     except:
         pass
+
     return row
 
 
@@ -116,19 +130,13 @@ def create_movies(sessions):
     :param sessions:
     :return:
     """
-    columns = ["title", "original_title", "year", "id_imdb", "url_imdb", "rating_imdb", "release_date",
-               "genre", "rated", "director", "writer", "actors", "plot", "language", "country", "awards", "production"]
-
     movies = pd.DataFrame()
-    movies = sessions[["title", "original_title"]].copy().drop_duplicates()
-
-    # CREAR TITLE Y ORIGINAL TITLE COMO UNIQUE DEL DATAFRAME SESSIONS
-    # ...
-
-    # ...
+    movies = sessions[["title", "original_title", "date"]].copy().drop_duplicates()
+    movies = movies.groupby(by=["title", "original_title"], dropna=False).agg(min_date=('date', 'min')).reset_index()
 
     # POR CADA PELICULA:
     movies = movies.apply(lambda row: set_imdb_info(row), axis=1)
+    movies = movies.drop(["original title", "min_date"], axis=1)
 
     return movies
 
@@ -136,26 +144,25 @@ def main():
     """
     :return:
     """
-    columns = [
-        'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
-        'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
-        'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
-        'amount_eur', 'spectators']
-
-    sessions = pd.DataFrame(columns=columns)
+    sessions = pd.DataFrame()
 
     sessions = create_sessions(sessions)
     movies = create_movies(sessions)
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 500)
+    pd.set_option('display.width', 1000)
+    print(movies.head(20))
 
-    sessions.to_csv("sessions.csv", index=False)
-    movies.to_csv("movies.csv", index=False)
+    # sessions.to_csv("sessions.csv", index=False)
+    # movies.to_csv("movies.csv", index=False)
 
 
 if __name__ == "__main__":
     main()
 
 # TODO
-# Añadir titulo original a aquellas peliculas que no lo tengan (fase 1 y fase 2)
-# Concatenar el dataframe de cada iteracion en uno final que será ya la tabla de sessiones (eliminar de esta tabla las columnas de increment)
-# Coger las peliculas del dataframe session con el atributo unique() y crear un dataframe nuevo que sera la tabla de peliculas, enriquecer este dataframe con imdb ...
+# Hay algunas películas que no se encuentran en IMDb y aparecen en movies con NaN excepto title
+# Volver a buscar esas películas sin el anio en el titulo
+
+# Mirar fichero maldito
 # Con esto tendriamos las dos tablas listas
