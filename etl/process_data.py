@@ -21,7 +21,7 @@ def create_sessions(sessions):
     files = os.listdir(interim_data_path)
     files.sort()
 
-    for file in files[:1]:
+    for file in files:
         print(
             ("-" * 10)
             + "{}".format(file)
@@ -30,7 +30,7 @@ def create_sessions(sessions):
         datetime_file = file.split('.')[0]
 
         # First Season
-        if datetime_file < '2013-01-11':
+        if datetime_file < '2013-01-11' and datetime_file != '2013-12-27':
             header = [
                 'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
                 'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
