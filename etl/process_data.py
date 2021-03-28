@@ -25,8 +25,8 @@ def set_primary_key_sessions(row,movies):
     :param row:
     :return:
     """
-    try:
-        id_imdb = movies[movies['title'].lower() == row['title'].lower()]['id_imdb'].values[0]
+    try:        
+        id_imdb = movies[movies['title'].str.lower() == row['title'].lower()]['id_imdb'].values[0]
         if id_imdb:
             row['id_imdb'] = id_imdb
         else:
@@ -41,7 +41,7 @@ def create_sessions(sessions):
     files = os.listdir(interim_data_path)
     files.sort()
 
-    for file in files[-10:]:
+    for file in files[-1:]:
         print(
             ("-" * 10)
             + "{}".format(file)
