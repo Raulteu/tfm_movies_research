@@ -209,8 +209,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# TODO
-# Mirar fichero maldito
-# al importar en mongo de la entidad movies los atributos con listas, se carga como un string grande y no como una lista
-# afinar mas la busqueda de peliculas en imdb
