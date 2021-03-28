@@ -11,17 +11,37 @@ processed_data_path = os.path.abspath(
     os.path.join(os.getcwd(), os.pardir, "data", "processed")
 )
 
+############################
+#    SESSIONS FUNCTIONS    #
+############################
+
 def read_xlsx(filename, extension, skiprows, cols):
     df = pd.read_excel(filename, header=None, skiprows=skiprows, names=cols)
     return df
 
+def set_primary_key_sessions(row,movies):
+    """
+    :param movies:
+    :param row:
+    :return:
+    """
+    try:
+        id_imdb = movies[movies['title'] == row['title']]['id_imdb'].values[0]
+        if id_imdb:
+            row['id_imdb'] = id_imdb
+        else:
+            row['id_imdb'] = None
+    except:
+        row['id_imdb'] = None
+    
+    return row
 
 def create_sessions(sessions):
 
     files = os.listdir(interim_data_path)
     files.sort()
 
-    for file in files:
+    for file in files[-10:]:
         print(
             ("-" * 10)
             + "{}".format(file)
@@ -39,6 +59,7 @@ def create_sessions(sessions):
             df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=10, cols=header)
             df['original_title'] = np.nan
             df = df.iloc[9:].copy()
+
         # Second Season
         elif datetime_file >= '2013-01-11' and datetime_file < '2014-05-16':
             header = [
@@ -49,6 +70,7 @@ def create_sessions(sessions):
             df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=14, cols=header)
             df['original_title'] = np.nan
             df = df.iloc[8:].copy()
+
         # Third Season
         elif datetime_file >= '2014-05-16' and datetime_file < '2015-05-29':
             header = [
@@ -56,7 +78,6 @@ def create_sessions(sessions):
                 'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
                 'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
                 'amount_eur', 'spectators']
-
             df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=16, cols=header)
 
         # Fourth Season
@@ -78,6 +99,9 @@ def create_sessions(sessions):
 
     return sessions
 
+############################
+#     MOVIES FUNCTIONS     #
+############################
 
 def set_imdb_info(row):
     """
@@ -94,7 +118,6 @@ def set_imdb_info(row):
         print("*" * 50)
         print("Getting info about {}...".format(movie_name))
 
-    
         ia = IMDb()
         ids = ia.search_movie(movie_name)
 
@@ -148,22 +171,9 @@ def create_movies(sessions):
     return movies
 
 
-def set_primary_key_sessions(row,movies):
-    """
-    :param movies:
-    :param row:
-    :return:
-    """
-    try:
-        id_imdb = movies[movies['title'] == row['title']]['id_imdb'].values[0]
-        if id_imdb:
-            row['id_imdb'] = id_imdb
-        else:
-            row['id_imdb'] = None
-    except:
-        row['id_imdb'] = None
-    
-    return row
+############################
+#     EXPORT FUNCTIONS     #
+############################
 
 def export_files_to_csv(sessions,movies):
     """
@@ -190,7 +200,12 @@ def export_files_to_json(sessions,movies):
     with open(processed_data_path + '/movies.json', 'w') as f:
         f.write(movies_json)
 
-def main():
+
+############################
+#       MAIN FUNCTION      #
+############################
+
+def generate_processed_files():
     """
     :return:
     """
@@ -200,12 +215,8 @@ def main():
     movies = create_movies(sessions)
     sessions = sessions.apply(lambda row: set_primary_key_sessions(row, movies), axis=1)
 
-    pd.set_option('display.max_rows', 500)
-    pd.set_option('display.max_columns', 500)
-    pd.set_option('display.width', 1000)
-
     export_files_to_csv(sessions, movies)
     export_files_to_json(sessions, movies)
 
 if __name__ == "__main__":
-    main()
+    generate_processed_files()
