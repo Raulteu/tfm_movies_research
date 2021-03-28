@@ -4,6 +4,12 @@ import pandas as pd
 import numpy as np
 from imdb import IMDb
 
+interim_data_path = os.path.abspath(
+    os.path.join(os.getcwd(), os.pardir, "data", "interim")
+)
+processed_data_path = os.path.abspath(
+    os.path.join(os.getcwd(), os.pardir, "data", "processed")
+)
 
 def read_xlsx(filename, extension, skiprows, cols):
     df = pd.read_excel(filename, header=None, skiprows=skiprows, names=cols)
@@ -11,9 +17,6 @@ def read_xlsx(filename, extension, skiprows, cols):
 
 
 def create_sessions(sessions):
-    interim_data_path = os.path.abspath(
-        os.path.join(os.getcwd(), os.pardir, "data", "interim")
-    )
 
     files = os.listdir(interim_data_path)
     files.sort()
@@ -30,37 +33,37 @@ def create_sessions(sessions):
         if datetime_file < '2013-01-11':
             header = [
                 'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
-                'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
+                'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
                 'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
                 'amount_eur', 'spectators']
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=19, cols=header)
+            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=10, cols=header)
             df['original_title'] = np.nan
             df = df.iloc[9:].copy()
         # Second Season
         elif datetime_file >= '2013-01-11' and datetime_file < '2014-05-16':
             header = [
                 'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
-                'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
+                'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
                 'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
                 'amount_eur', 'spectators']
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=22, cols=header)
+            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=14, cols=header)
             df['original_title'] = np.nan
             df = df.iloc[8:].copy()
         # Third Season
         elif datetime_file >= '2014-05-16' and datetime_file < '2015-05-29':
             header = [
                 'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
-                'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
+                'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
                 'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
                 'amount_eur', 'spectators']
 
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=22, cols=header)
+            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=16, cols=header)
 
         # Fourth Season
         else:
             header = [
                 'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
-                'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
+                'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
                 'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
                 'amount_eur', 'spectators']
             df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=16, cols=header)
@@ -68,14 +71,10 @@ def create_sessions(sessions):
         df['date'] = datetime_file
         sessions = pd.concat([sessions, df])
 
-    # header = [
-    #     'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
-    #     'gross_total', 'gross_increment', 'gross_cinema_mean', 'gross_screens_mean',
-    #     'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
-    #     'amount_eur', 'spectators']
-    # sessions = read_xlsx(os.path.join(interim_data_path, '2013-12-27.xls'), 'xls', skiprows=22, cols=header)
-
     sessions = sessions[sessions["rank"].notna()].copy()
+    sessions['id_imdb'] = np.nan
+    sessions = sessions.drop(['gross_delta','admissions_delta'],axis=1)
+    sessions = sessions.sort_values(by = ['date','rank'])
 
     return sessions
 
@@ -85,24 +84,32 @@ def set_imdb_info(row):
     :param row:
     :return:
     """
-    if pd.isnull(row['original_title']):
-        movie_name = row['title'] + " " + row['min_date'][0:4]
-    else:
-        movie_name = row['original_title']
-
-    # movie_name = row['title']
-    print("*" * 50)
-    print("Getting info about {}...".format(movie_name))
-
     try:
+            
+        if pd.isnull(row['original_title']):
+            movie_name = row['title'] + " " + row['min_date'][0:4]
+        else:
+            movie_name = row['original_title']
+
+        print("*" * 50)
+        print("Getting info about {}...".format(movie_name))
+
+    
         ia = IMDb()
-        id = ia.search_movie(movie_name)[0].movieID
+        ids = ia.search_movie(movie_name)
+
+        if(len(ids) > 0):
+            id = ids[0].movieID
+        else:
+            ids = ia.search_movie(row['title'])
+            id = ids[0].movieID
+
         movie = ia.get_movie(id).data
 
         standard_features = ['year', 'rating', 'votes', 'original air date', 'genres', 'plot', 'languages',
                              'countries', 'original title', 'certificates']
 
-        features_with_name = ['director', 'writer', 'writers', 'producers', 'production companies'
+        features_with_name = ['director', 'writer', 'writers', 'producers', 'production companies',
                               'cast']
         row['original_title'] = movie['title']
         row['id_imdb'] = id
@@ -140,6 +147,49 @@ def create_movies(sessions):
 
     return movies
 
+
+def set_primary_key_sessions(row,movies):
+    """
+    :param movies:
+    :param row:
+    :return:
+    """
+    try:
+        id_imdb = movies[movies['title'] == row['title']]['id_imdb'].values[0]
+        if id_imdb:
+            row['id_imdb'] = id_imdb
+        else:
+            row['id_imdb'] = None
+    except:
+        row['id_imdb'] = None
+    
+    return row
+
+def export_files_to_csv(sessions,movies):
+    """
+    :param sessions:
+    :param movies:
+    :return:
+    """
+    
+    sessions.to_csv(processed_data_path + "/sessions.csv", index=False)
+    movies.to_csv(processed_data_path + "/movies.csv", index=False)
+
+def export_files_to_json(sessions,movies):
+    """
+    :param sessions:
+    :param movies:
+    :return:
+    """
+
+    sessions_json = sessions.to_json(orient='records')
+    with open(processed_data_path + '/sessions.json', 'w') as f:
+        f.write(sessions_json)
+
+    movies_json = movies.to_json(orient='records')
+    with open(processed_data_path + '/movies.json', 'w') as f:
+        f.write(movies_json)
+
 def main():
     """
     :return:
@@ -148,21 +198,19 @@ def main():
 
     sessions = create_sessions(sessions)
     movies = create_movies(sessions)
+    sessions = sessions.apply(lambda row: set_primary_key_sessions(row, movies), axis=1)
+
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.set_option('display.width', 1000)
-    print(movies.head(20))
 
-    # sessions.to_csv("sessions.csv", index=False)
-    # movies.to_csv("movies.csv", index=False)
-
+    export_files_to_csv(sessions, movies)
+    export_files_to_json(sessions, movies)
 
 if __name__ == "__main__":
     main()
 
 # TODO
-# Hay algunas películas que no se encuentran en IMDb y aparecen en movies con NaN excepto title
-# Volver a buscar esas películas sin el anio en el titulo
-
 # Mirar fichero maldito
-# Con esto tendriamos las dos tablas listas
+# al importar en mongo de la entidad movies los atributos con listas, se carga como un string grande y no como una lista
+# afinar mas la busqueda de peliculas en imdb

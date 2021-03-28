@@ -37,3 +37,17 @@ Este script es el encargado de generar el fichero [CSV | JSON] para despues impo
 ```
 python process_data.py
 ```
+
+
+## Importar datos a la Base de Datos
+
+En este caso se ha seleccionado una Base de Datos no relacional (Mongo) dada la estructura de los campos procedentes de la entidad pelicula. Para importar los datos en esta BBDD deberemos:
+
+```
+use db_movies
+
+mongoimport --db db_movies --collection sessions --file data/processed/sessions.json --jsonArray
+
+
+mongoimport --db db_movies --collection movies --file data/processed/movies.json --jsonArray
+```

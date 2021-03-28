@@ -3,3 +3,5 @@
 *.doc
 *.docx
 *.DS_Store
+*.idea
+data/*
