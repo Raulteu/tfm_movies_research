@@ -54,5 +54,4 @@ mongoimport --db db_movies --collection movies --file data/processed/movies.json
 ## TODO
 
 - Mirar fichero maldito (2013-12-27)
-- al importar en mongo de la entidad movies los atributos con listas, se carga como un string grande y no como una lista
 - afinar mas la busqueda de peliculas en imdb
