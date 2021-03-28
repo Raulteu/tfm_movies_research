@@ -26,7 +26,7 @@ def set_primary_key_sessions(row,movies):
     :return:
     """
     try:
-        id_imdb = movies[movies['title'] == row['title']]['id_imdb'].values[0]
+        id_imdb = movies[movies['title'].lower() == row['title'].lower()]['id_imdb'].values[0]
         if id_imdb:
             row['id_imdb'] = id_imdb
         else:
