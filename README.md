@@ -40,10 +40,10 @@ python process_data.py <absolute-path-filename>
 
 Dado que llegarán ficheros de forma semanal se han creados dos scripts de bash para automatizar esta tarea.
 
-- Por un lado tenemos el script semanal (**load_mongo_weekly**) quebásicamente ejecuta el fichero de python anterior, panado el fichero como aegumento. Para ello:
+- Por un lado tenemos el script semanal (**load_mongo_weekly**) que básicamente ejecuta el fichero python anterior, pasado como aegumento. Para ello:
 
 ```
-/load_mongo_weekly.sh <absolute-path-filename>
+./load_mongo_weekly.sh <absolute-path-filename>
 ```
 
 Tras ello ejecutará las instrucciones para importar los datos en la BBDD
@@ -52,7 +52,7 @@ Tras ello ejecutará las instrucciones para importar los datos en la BBDD
 
 
 ```
-/load_mongo_weekly.sh <directory>
+./load_mongo_weekly.sh <directory>
 ```
 
 ## Importar datos a la Base de Datos
@@ -65,6 +65,21 @@ use db_movies
 mongoimport --db db_movies --collection sessions --file data/processed/sessions.json --jsonArray
 
 mongoimport --db db_movies --collection movies --file data/processed/movies.json --jsonArray
+```
+
+
+## Cheatsheet
+Comprobar duplicados en movies:
+```
+db.movies.aggregate([
+    { $group: {
+                "_id": "$id_imdb",
+                "Count": { $sum: 1}
+              }
+    },
+    { $project: {"title" : 1, "_id": 1, "Count": 1}},
+    { $sort : { Count : -1 } }
+])
 ```
 
 ## TODO

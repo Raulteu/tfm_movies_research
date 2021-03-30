@@ -131,6 +131,7 @@ def set_imdb_info(row):
         features_with_name = ['director', 'writer', 'writers', 'producers', 'production companies',
                               'cast']
         row['original_title'] = movie['title']
+        row['_id'] = id
         row['id_imdb'] = id
         row['url'] = "https://www.imdb.com/title/tt" + id
 
