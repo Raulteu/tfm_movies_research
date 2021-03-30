@@ -32,12 +32,28 @@ python preprocess_data.py
 
 ## Procesado
 
-Este script es el encargado de generar el fichero [CSV | JSON] para despues imporarlo en la base de datos y explotar los datos, para ejecutarlo:
+Para procesar los datos se ha creado un script en python encargado de generar el fichero csv | json correspondiente al fichero excel pasado por argumento. Para realizarlo debemos ejecutar:
 
 ```
-python process_data.py
+python process_data.py <absolute-path-filename>
 ```
 
+Dado que llegarán ficheros de forma semanal se han creados dos scripts de bash para automatizar esta tarea.
+
+- Por un lado tenemos el script semanal (**load_mongo_weekly**) quebásicamente ejecuta el fichero de python anterior, panado el fichero como aegumento. Para ello:
+
+```
+/load_mongo_weekly.sh <absolute-path-filename>
+```
+
+Tras ello ejecutará las instrucciones para importar los datos en la BBDD
+
+- Por otro lado, tenemos el script para cargar el histórico, que itera sobre todos los ficheros situados en la carpeta interim y ejecuta para cada uno de ellos el script semanal, importando también los datos en la BBDD.
+
+
+```
+/load_mongo_weekly.sh <directory>
+```
 
 ## Importar datos a la Base de Datos
 

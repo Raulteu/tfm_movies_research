@@ -1,12 +1,12 @@
 import os
 import json
+import sys
 import pandas as pd
 import numpy as np
 from imdb import IMDb
+import collections
 
-interim_data_path = os.path.abspath(
-    os.path.join(os.getcwd(), os.pardir, "data", "interim")
-)
+
 processed_data_path = os.path.abspath(
     os.path.join(os.getcwd(), os.pardir, "data", "processed")
 )
@@ -36,63 +36,57 @@ def set_primary_key_sessions(row,movies):
     
     return row
 
-def create_sessions(sessions):
+def create_sessions(sessions, filename):
 
-    files = os.listdir(interim_data_path)
-    files.sort()
-    files = ["2013-01-04.xls", "2014-05-16.xls", "2014-05-23.xls", "2015-06-05.xls"]
-    # files.remove('2013-12-27.xls')
+    datetime_file = filename.split('.')[len(filename.split('.'))-2][-10:]
+    print(
+        ("-" * 10)
+        + "{}".format(datetime_file)
+        + ("-" * 10)
+    )
+    
+    # First Season
+    if datetime_file < '2013-01-11' and datetime_file != '2013-12-27':
+        header = [
+            'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
+            'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
+            'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
+            'amount_eur', 'spectators']
+        df = read_xlsx(filename, 'xls', skiprows=10, cols=header)
+        df['original_title'] = np.nan
+        df = df.iloc[9:].copy()
 
-    for file in files:
-        print(
-            ("-" * 10)
-            + "{}".format(file)
-            + ("-" * 10)
-        )
-        datetime_file = file.split('.')[0]
+    # Second Season
+    elif datetime_file >= '2013-01-11' and datetime_file <= '2014-05-16':
+        header = [
+            'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
+            'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
+            'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
+            'amount_eur', 'spectators']
+        df = read_xlsx(filename, 'xls', skiprows=14, cols=header)
+        df['original_title'] = np.nan
+        df = df.iloc[8:].copy()
 
-        # First Season
-        if datetime_file < '2013-01-11' and datetime_file != '2013-12-27':
-            header = [
-                'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
-                'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
-                'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
-                'amount_eur', 'spectators']
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=10, cols=header)
-            df['original_title'] = np.nan
-            df = df.iloc[9:].copy()
+    # Third Season
+    elif datetime_file > '2014-05-16' and datetime_file <= '2015-05-29':
+        header = [
+            'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
+            'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
+            'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
+            'amount_eur', 'spectators']
+        df = read_xlsx(filename, 'xls', skiprows=21, cols=header)
 
-        # Second Season
-        elif datetime_file >= '2013-01-11' and datetime_file <= '2014-05-16':
-            header = [
-                'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
-                'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
-                'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
-                'amount_eur', 'spectators']
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=14, cols=header)
-            df['original_title'] = np.nan
-            df = df.iloc[8:].copy()
+    # Fourth Season
+    else:
+        header = [
+            'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
+            'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
+            'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
+            'amount_eur', 'spectators']
+        df = read_xlsx(filename, 'xls', skiprows=16, cols=header)
 
-        # Third Season
-        elif datetime_file > '2014-05-16' and datetime_file <= '2015-05-29':
-            header = [
-                'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
-                'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
-                'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
-                'amount_eur', 'spectators']
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=21, cols=header)
-
-        # Fourth Season
-        else:
-            header = [
-                'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
-                'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
-                'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
-                'amount_eur', 'spectators']
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=16, cols=header)
-
-        df['date'] = datetime_file
-        sessions = pd.concat([sessions, df])
+    df['date'] = datetime_file
+    sessions = pd.concat([sessions, df])
 
     sessions = sessions[sessions["rank"].notna()].copy()
     sessions['id_imdb'] = np.nan
@@ -166,9 +160,12 @@ def create_movies(sessions):
     movies = sessions[["title", "original_title", "date"]].copy().drop_duplicates()
     movies = movies.groupby(by=["title", "original_title"], dropna=False).agg(min_date=('date', 'min')).reset_index()
 
-    # POR CADA PELICULA:
     movies = movies.apply(lambda row: set_imdb_info(row), axis=1)
-    movies = movies.drop(["original title", "min_date"], axis=1)
+    if 'original title' in movies.columns:
+        movies = movies.drop(["original title", "min_date"], axis=1)
+    else:
+        movies = movies.drop(["min_date"], axis=1)
+
 
     return movies
 
@@ -177,29 +174,31 @@ def create_movies(sessions):
 #     EXPORT FUNCTIONS     #
 ############################
 
-def export_files_to_csv(sessions,movies):
+def export_files_to_csv(sessions, movies, datetime_file):
     """
     :param sessions:
     :param movies:
+    :param year:
     :return:
     """
     
-    sessions.to_csv(processed_data_path + "/sessions.csv", index=False)
-    movies.to_csv(processed_data_path + "/movies.csv", index=False)
+    sessions.to_csv(processed_data_path + "/csv/sessions_{}.csv".format(datetime_file), index=False)
+    movies.to_csv(processed_data_path + "/csv/movies_{}.csv".format(datetime_file), index=False)
 
-def export_files_to_json(sessions,movies):
+def export_files_to_json(sessions, movies, datetime_file):
     """
     :param sessions:
     :param movies:
+    :param year:
     :return:
     """
 
     sessions_json = sessions.to_json(orient='records')
-    with open(processed_data_path + '/sessions.json', 'w') as f:
+    with open(processed_data_path + '/json/sessions_{}.json'.format(datetime_file), 'w') as f:
         f.write(sessions_json)
 
     movies_json = movies.to_json(orient='records')
-    with open(processed_data_path + '/movies.json', 'w') as f:
+    with open(processed_data_path + '/json/movies_{}.json'.format(datetime_file), 'w') as f:
         f.write(movies_json)
 
 
@@ -207,19 +206,26 @@ def export_files_to_json(sessions,movies):
 #       MAIN FUNCTION      #
 ############################
 
-def generate_processed_files():
+def generate_processed_files(filename):
     """
     :return:
     """
+    datetime_file = filename.split('.')[len(filename.split('.'))-2][-10:]
     sessions = pd.DataFrame()
-    sessions = create_sessions(sessions)
+    sessions = create_sessions(sessions,filename)
 
     movies = create_movies(sessions)
     sessions = sessions.apply(lambda row: set_primary_key_sessions(row, movies), axis=1)
 
-    export_files_to_csv(sessions, movies)
-    export_files_to_json(sessions, movies)
+    export_files_to_csv(sessions, movies, datetime_file)
+    export_files_to_json(sessions, movies, datetime_file)
 
 
 if __name__ == "__main__":
-    generate_processed_files()
+    
+    try:
+        if (len(sys.argv) != 2):
+            raise Exception('[ERROR] Incorrect Args : python process_data.py <absolute_filename_path>')
+        generate_processed_files(sys.argv[1])
+    except Exception as e:
+        print(e)
