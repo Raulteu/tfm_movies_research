@@ -40,8 +40,10 @@ def create_sessions(sessions):
 
     files = os.listdir(interim_data_path)
     files.sort()
+    files = ["2013-01-04.xls", "2014-05-16.xls", "2014-05-23.xls", "2015-06-05.xls"]
+    # files.remove('2013-12-27.xls')
 
-    for file in files[-1:]:
+    for file in files:
         print(
             ("-" * 10)
             + "{}".format(file)
@@ -61,7 +63,7 @@ def create_sessions(sessions):
             df = df.iloc[9:].copy()
 
         # Second Season
-        elif datetime_file >= '2013-01-11' and datetime_file < '2014-05-16':
+        elif datetime_file >= '2013-01-11' and datetime_file <= '2014-05-16':
             header = [
                 'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
                 'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
@@ -72,13 +74,13 @@ def create_sessions(sessions):
             df = df.iloc[8:].copy()
 
         # Third Season
-        elif datetime_file >= '2014-05-16' and datetime_file < '2015-05-29':
+        elif datetime_file > '2014-05-16' and datetime_file <= '2015-05-29':
             header = [
                 'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
                 'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
                 'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
                 'amount_eur', 'spectators']
-            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=16, cols=header)
+            df = read_xlsx(os.path.join(interim_data_path, file), 'xls', skiprows=21, cols=header)
 
         # Fourth Season
         else:
@@ -210,8 +212,8 @@ def generate_processed_files():
     :return:
     """
     sessions = pd.DataFrame()
-
     sessions = create_sessions(sessions)
+
     movies = create_movies(sessions)
     sessions = sessions.apply(lambda row: set_primary_key_sessions(row, movies), axis=1)
 
