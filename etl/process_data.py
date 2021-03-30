@@ -220,5 +220,6 @@ def generate_processed_files():
     export_files_to_csv(sessions, movies)
     export_files_to_json(sessions, movies)
 
+
 if __name__ == "__main__":
     generate_processed_files()
