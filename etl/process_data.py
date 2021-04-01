@@ -77,13 +77,23 @@ def create_sessions(sessions, filename):
         df = read_xlsx(filename, 'xls', skiprows=21, cols=header)
 
     # Fourth Season
-    else:
+    elif datetime_file > '2014-05-16' and datetime_file <= '2016-12-23':
         header = [
             'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
             'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
             'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
             'amount_eur', 'spectators']
         df = read_xlsx(filename, 'xls', skiprows=16, cols=header)
+
+    # Fifth Season
+    else:
+        header = [
+            'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
+            'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
+            'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
+            'amount_eur', 'spectators']
+        df = read_xlsx(filename, 'xls', skiprows=2, cols=header)
+
 
     df['date'] = datetime_file
     sessions = pd.concat([sessions, df])
