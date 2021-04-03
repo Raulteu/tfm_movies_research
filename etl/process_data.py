@@ -54,8 +54,9 @@ def create_sessions(sessions, filename):
             'amount_eur', 'spectators']
         df = read_xlsx(filename, 'xls', skiprows=10, cols=header)
         df['original_title'] = np.nan
+        df['sem'] = df['sem'].replace({'P': 1})
         df = df.iloc[9:].copy()
-
+    
     # Second Season
     elif datetime_file >= '2013-01-11' and datetime_file <= '2014-05-16':
         header = [
@@ -65,6 +66,7 @@ def create_sessions(sessions, filename):
             'amount_eur', 'spectators']
         df = read_xlsx(filename, 'xls', skiprows=14, cols=header)
         df['original_title'] = np.nan
+        df['sem'] = df['sem'].replace({'P': 1})
         df = df.iloc[8:].copy()
 
     # Third Season
@@ -75,15 +77,17 @@ def create_sessions(sessions, filename):
             'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
             'amount_eur', 'spectators']
         df = read_xlsx(filename, 'xls', skiprows=21, cols=header)
+        df['sem'] = df['sem'].replace({'P': 1})
 
     # Fourth Season
-    elif datetime_file > '2014-05-16' and datetime_file <= '2016-12-23':
+    elif datetime_file > '2015-05-29' and datetime_file <= '2016-12-23':
         header = [
             'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
             'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
             'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
             'amount_eur', 'spectators']
         df = read_xlsx(filename, 'xls', skiprows=16, cols=header)
+        df['sem'] = df['sem'].replace({'P': 1})
 
     # Fifth Season
     else:
@@ -93,6 +97,7 @@ def create_sessions(sessions, filename):
             'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
             'amount_eur', 'spectators']
         df = read_xlsx(filename, 'xls', skiprows=2, cols=header)
+        df['sem'] = df['sem'].replace({'P': 1})
 
 
     df['date'] = datetime_file

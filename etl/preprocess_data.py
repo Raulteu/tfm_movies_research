@@ -44,7 +44,7 @@ def generate_interim_files():
             for item in os.listdir(current_year_path)
             if os.path.isdir(os.path.join(current_year_path, item))
         ]
-
+        
         for month in months:
             print(
                 ("-" * 10)
@@ -52,7 +52,8 @@ def generate_interim_files():
                 + ("-" * 10)
             )
 
-            if year <=2016 and months_map[month] <= 3:
+            
+            if year <= 2015 or (year == 2016 and months_map[month] <= 5):
 
                 current_month_path = os.path.join(current_year_path, month, "top fin de semana")
                 files = [
@@ -96,7 +97,6 @@ def generate_interim_files():
                     shutil.copy(os.path.join(current_month_path, week_file), interim_data_path)
                     os.rename(os.path.join(interim_data_path, week_file), os.path.join(interim_data_path, filename))
                     print("{} - {} --> {}".format(week_file, week_date, filename))
-
 
 if __name__ == "__main__":
     generate_interim_files()
