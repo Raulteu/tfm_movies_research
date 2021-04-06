@@ -62,6 +62,7 @@ def generate_interim_files():
                     if (item.upper().endswith(".XLSX") or item.upper().endswith(".XLS"))
                     and item.upper().startswith("TOP FIN DE SEMANA")
                 ]
+                files.sort()
                 monthcal = c.monthdatescalendar(year, months_map[month])
                 for week_file in files:
                     week_number = int(week_file.split(".")[0][-1])
@@ -69,8 +70,12 @@ def generate_interim_files():
                         day
                         for week in monthcal
                         for day in week
-                        if day.weekday() == calendar.SUNDAY
+                        if day.weekday() == calendar.FRIDAY
                     ]
+
+                    if len(week_date) > len(files):
+                        week_date.remove(week_date[0])
+                        
                     week_date = week_date[week_number - 1]
                     filename = week_date.__str__() + "." + week_file.split(".")[1]
                     shutil.copy(os.path.join(current_month_path, week_file), interim_data_path)
@@ -83,6 +88,7 @@ def generate_interim_files():
                     for item in os.listdir(current_month_path)
                     if (item.upper().endswith("TOP FIN DE SEMANA.XLSX") or item.upper().endswith("TOP FIN DE SEMANA.XLS"))
                 ]
+                files.sort()
                 monthcal = c.monthdatescalendar(year, months_map[month])
                 for week_file in files:
                     week_number = int(week_file.split(".")[0])
@@ -90,8 +96,12 @@ def generate_interim_files():
                         day
                         for week in monthcal
                         for day in week
-                        if day.weekday() == calendar.SUNDAY
+                        if day.weekday() == calendar.FRIDAY
                     ]
+
+                    if len(week_date) > len(files):
+                        week_date.remove(week_date[0])
+
                     week_date = week_date[week_number-1]
                     filename = week_date.__str__() + "." + week_file.split(".")[2]
                     shutil.copy(os.path.join(current_month_path, week_file), interim_data_path)
