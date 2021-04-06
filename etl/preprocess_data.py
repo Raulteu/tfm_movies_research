@@ -69,7 +69,7 @@ def generate_interim_files():
                         day
                         for week in monthcal
                         for day in week
-                        if day.weekday() == calendar.FRIDAY
+                        if day.weekday() == calendar.SUNDAY
                     ]
                     week_date = week_date[week_number - 1]
                     filename = week_date.__str__() + "." + week_file.split(".")[1]
@@ -90,7 +90,7 @@ def generate_interim_files():
                         day
                         for week in monthcal
                         for day in week
-                        if day.weekday() == calendar.FRIDAY
+                        if day.weekday() == calendar.SUNDAY
                     ]
                     week_date = week_date[week_number-1]
                     filename = week_date.__str__() + "." + week_file.split(".")[2]
