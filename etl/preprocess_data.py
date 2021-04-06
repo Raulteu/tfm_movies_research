@@ -100,7 +100,7 @@ def generate_interim_files():
                     ]
 
                     if len(week_date) > len(files):
-                        week_date.remove(week_date[0])
+                        week_date.remove(week_date[len(week_date)-1])
 
                     week_date = week_date[week_number-1]
                     filename = week_date.__str__() + "." + week_file.split(".")[2]
