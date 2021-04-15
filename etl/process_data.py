@@ -90,7 +90,7 @@ def create_sessions(sessions, filename):
         df['sem'] = df['sem'].replace({'P': 1})
 
     # Fifth Season
-    else:
+    elif datetime_file > '2016-12-23':
         header = [
             'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
             'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
