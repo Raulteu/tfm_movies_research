@@ -55,7 +55,6 @@ def create_sessions(sessions, filename):
         df = read_xlsx(filename, 'xls', skiprows=19, cols=header)
         df['original_title'] = np.nan
         df['sem'] = df['sem'].replace({'P': 1})
-        #df = df.iloc[9:].copy()
     
     # Second Season
     elif datetime_file > '2013-01-11' and datetime_file <= '2015-05-29':
