@@ -25,7 +25,7 @@ def set_primary_key_sessions(row,movies):
     :param row:
     :return:
     """
-    try:        
+    try:    
         id_imdb = movies[movies['title'].str.lower() == row['title'].lower()]['id_imdb'].values[0]
         if id_imdb:
             row['id_imdb'] = id_imdb
@@ -38,15 +38,15 @@ def set_primary_key_sessions(row,movies):
 
 def create_sessions(sessions, filename):
 
-    datetime_file = filename.split('.')[len(filename.split('.'))-2][-10:]
+    datetime_month_week_file = filename.split('.')[len(filename.split('.'))-2][-9:]
     print(
         ("-" * 10)
-        + "{}".format(datetime_file)
+        + "{}".format(datetime_month_week_file)
         + ("-" * 10)
     )
     
     # First Season
-    if datetime_file <= '2013-01-11' and datetime_file != '2013-12-27':
+    if datetime_month_week_file <= '2013-01-1':
         header = [
             'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
             'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
@@ -57,7 +57,7 @@ def create_sessions(sessions, filename):
         df['sem'] = df['sem'].replace({'P': 1})
     
     # Second Season
-    elif datetime_file > '2013-01-11' and datetime_file <= '2015-05-29':
+    elif datetime_month_week_file > '2013-01-1' and datetime_month_week_file <= '2015-05-5' and datetime_month_week_file != '2013-12-5':
         header = [
             'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
             'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
@@ -68,7 +68,7 @@ def create_sessions(sessions, filename):
         df['sem'] = df['sem'].replace({'P': 1})
 
     # Third Season
-    elif datetime_file > '2015-05-29' and datetime_file <= '2016-12-23':
+    elif datetime_month_week_file > '2015-05-5' and datetime_month_week_file <= '2016-12-4':
         header = [
             'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
             'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
@@ -78,7 +78,7 @@ def create_sessions(sessions, filename):
         df['sem'] = df['sem'].replace({'P': 1})
 
     # Fourth Season
-    elif datetime_file > '2016-12-23':
+    elif datetime_month_week_file > '2016-12-4':
         header = [
             'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
             'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
@@ -88,13 +88,13 @@ def create_sessions(sessions, filename):
         df['sem'] = df['sem'].replace({'P': 1})
 
 
-    df['date'] = datetime_file
+    df['date_file'] = datetime_month_week_file
     sessions = pd.concat([sessions, df])
 
     sessions = sessions[sessions["rank"].notna()].copy()
     sessions['id_imdb'] = np.nan
     sessions = sessions.drop(['gross_delta','admissions_delta'],axis=1)
-    sessions = sessions.sort_values(by = ['date','rank'])
+    sessions = sessions.sort_values(by = ['date_file','rank'])
 
     return sessions
 
@@ -110,7 +110,7 @@ def set_imdb_info(row):
     try:
             
         if pd.isnull(row['original_title']):
-            movie_name = row['title'] + " " + row['min_date'][0:4]
+            movie_name = row['title'] + " " + row['date_file'][0:4]
         else:
             movie_name = row['original_title']
 
@@ -133,7 +133,6 @@ def set_imdb_info(row):
 
         features_with_name = ['director', 'writer', 'writers', 'producers', 'production companies',
                               'cast']
-        row['original_title'] = movie['title']
         row['_id'] = id
         row['id_imdb'] = id
         row['url'] = "https://www.imdb.com/title/tt" + id
@@ -161,14 +160,14 @@ def create_movies(sessions):
     :return:
     """
     movies = pd.DataFrame()
-    movies = sessions[["title", "original_title", "date"]].copy().drop_duplicates()
-    movies = movies.groupby(by=["title", "original_title"], dropna=False).agg(min_date=('date', 'min')).reset_index()
+    movies = sessions[["title", "original_title", "date_file"]].copy().drop_duplicates()
 
     movies = movies.apply(lambda row: set_imdb_info(row), axis=1)
-    if 'original title' in movies.columns:
-        movies = movies.drop(["original title", "min_date"], axis=1)
+    
+    if 'original_title' in movies.columns:
+        movies = movies.drop(["original_title", "date_file"], axis=1)
     else:
-        movies = movies.drop(["min_date"], axis=1)
+        movies = movies.drop(["date_file"], axis=1)
 
 
     return movies
@@ -178,7 +177,7 @@ def create_movies(sessions):
 #     EXPORT FUNCTIONS     #
 ############################
 
-def export_files_to_csv(sessions, movies, datetime_file):
+def export_files_to_csv(sessions, movies, datetime_month_week_file):
     """
     :param sessions:
     :param movies:
@@ -186,10 +185,10 @@ def export_files_to_csv(sessions, movies, datetime_file):
     :return:
     """
     
-    sessions.to_csv(processed_data_path + "/csv/sessions_{}.csv".format(datetime_file), index=False)
-    movies.to_csv(processed_data_path + "/csv/movies_{}.csv".format(datetime_file), index=False)
+    sessions.to_csv(processed_data_path + "/csv/sessions_{}.csv".format(datetime_month_week_file), index=False)
+    movies.to_csv(processed_data_path + "/csv/movies_{}.csv".format(datetime_month_week_file), index=False)
 
-def export_files_to_json(sessions, movies, datetime_file):
+def export_files_to_json(sessions, movies, datetime_month_week_file):
     """
     :param sessions:
     :param movies:
@@ -198,11 +197,11 @@ def export_files_to_json(sessions, movies, datetime_file):
     """
 
     sessions_json = sessions.to_json(orient='records')
-    with open(processed_data_path + '/json/sessions_{}.json'.format(datetime_file), 'w') as f:
+    with open(processed_data_path + '/json/sessions_{}.json'.format(datetime_month_week_file), 'w') as f:
         f.write(sessions_json)
 
     movies_json = movies.to_json(orient='records')
-    with open(processed_data_path + '/json/movies_{}.json'.format(datetime_file), 'w') as f:
+    with open(processed_data_path + '/json/movies_{}.json'.format(datetime_month_week_file), 'w') as f:
         f.write(movies_json)
 
 
@@ -214,15 +213,15 @@ def generate_processed_files(filename):
     """
     :return:
     """
-    datetime_file = filename.split('.')[len(filename.split('.'))-2][-10:]
+    datetime_month_week_file = filename.split('.')[len(filename.split('.'))-2][-9:]
     sessions = pd.DataFrame()
     sessions = create_sessions(sessions,filename)
 
     movies = create_movies(sessions)
     sessions = sessions.apply(lambda row: set_primary_key_sessions(row, movies), axis=1)
 
-    export_files_to_csv(sessions, movies, datetime_file)
-    export_files_to_json(sessions, movies, datetime_file)
+    export_files_to_csv(sessions, movies, datetime_month_week_file)
+    export_files_to_json(sessions, movies, datetime_month_week_file)
 
 
 if __name__ == "__main__":

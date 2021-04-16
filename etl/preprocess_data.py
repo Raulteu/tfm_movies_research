@@ -11,20 +11,19 @@ def generate_interim_files():
     interim_data_path = os.path.abspath(
         os.path.join(os.getcwd(), os.pardir, "data", "interim")
     )
-    c = calendar.Calendar(firstweekday=calendar.MONDAY)
     months_map = {
-        "enero": 1,
-        "febrero": 2,
-        "marzo": 3,
-        "abril": 4,
-        "mayo": 5,
-        "junio": 6,
-        "julio": 7,
-        "agosto": 8,
-        "septiembre": 9,
-        "octubre": 10,
-        "noviembre": 11,
-        "diciembre": 12,
+        "enero": "01",
+        "febrero": "02",
+        "marzo": "03",
+        "abril": "04",
+        "mayo": "05",
+        "junio": "06",
+        "julio": "07",
+        "agosto": "08",
+        "septiembre": "09",
+        "octubre": "10",
+        "noviembre": "11",
+        "diciembre": "12",
     }
 
     years = [
@@ -53,7 +52,7 @@ def generate_interim_files():
             )
 
             
-            if year <= 2015 or (year == 2016 and months_map[month] <= 5):
+            if year <= 2015 or (year == 2016 and months_map[month] <= '05'):
 
                 current_month_path = os.path.join(current_year_path, month, "top fin de semana")
                 files = [
@@ -63,24 +62,13 @@ def generate_interim_files():
                     and item.upper().startswith("TOP FIN DE SEMANA")
                 ]
                 files.sort()
-                monthcal = c.monthdatescalendar(year, months_map[month])
                 for week_file in files:
                     week_number = int(week_file.split(".")[0][-1])
-                    week_date = [
-                        day
-                        for week in monthcal
-                        for day in week
-                        if day.weekday() == calendar.FRIDAY
-                    ]
 
-                    if len(week_date) > len(files):
-                        week_date.remove(week_date[0])
-                        
-                    week_date = week_date[week_number - 1]
-                    filename = week_date.__str__() + "." + week_file.split(".")[1]
+                    filename = '{}-{}-{}'.format(year,months_map[month],week_number) + "." + week_file.split(".")[1]
                     shutil.copy(os.path.join(current_month_path, week_file), interim_data_path)
                     os.rename(os.path.join(interim_data_path, week_file), os.path.join(interim_data_path, filename))
-                    print("{} - {} --> {}".format(week_file, week_date, filename))
+                    print("{} --> {}".format(week_file, filename))
             else:
                 current_month_path = os.path.join(current_year_path, month)
                 files = [
@@ -89,24 +77,13 @@ def generate_interim_files():
                     if (item.upper().endswith("TOP FIN DE SEMANA.XLSX") or item.upper().endswith("TOP FIN DE SEMANA.XLS"))
                 ]
                 files.sort()
-                monthcal = c.monthdatescalendar(year, months_map[month])
                 for week_file in files:
                     week_number = int(week_file.split(".")[0])
-                    week_date = [
-                        day
-                        for week in monthcal
-                        for day in week
-                        if day.weekday() == calendar.FRIDAY
-                    ]
 
-                    if len(week_date) > len(files):
-                        week_date.remove(week_date[len(week_date)-1])
-
-                    week_date = week_date[week_number-1]
-                    filename = week_date.__str__() + "." + week_file.split(".")[2]
+                    filename = '{}-{}-{}'.format(year,months_map[month],week_number) + "." + week_file.split(".")[2]
                     shutil.copy(os.path.join(current_month_path, week_file), interim_data_path)
                     os.rename(os.path.join(interim_data_path, week_file), os.path.join(interim_data_path, filename))
-                    print("{} - {} --> {}".format(week_file, week_date, filename))
+                    print("{} --> {}".format(week_file, filename))
 
 if __name__ == "__main__":
     generate_interim_files()
