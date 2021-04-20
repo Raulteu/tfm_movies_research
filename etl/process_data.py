@@ -63,7 +63,7 @@ def create_sessions(sessions, filename):
             'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
             'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
             'amount_eur', 'spectators']
-        df = read_xlsx(filename, 'xls', skiprows=19, cols=header)
+        df = read_xlsx(filename, 'xls', skiprows=22, cols=header)
         df['original_title'] = np.nan
         df['sem'] = df['sem'].replace({'P': 1})
 
