@@ -57,7 +57,7 @@ def create_sessions(sessions, filename):
         df['sem'] = df['sem'].replace({'P': 1})
     
     # Second Season
-    elif datetime_month_week_file > '2013-01-1' and datetime_month_week_file <= '2015-05-5' and datetime_month_week_file != '2013-12-5':
+    elif datetime_month_week_file > '2013-01-1' and datetime_month_week_file <= '2014-05-3' and datetime_month_week_file != '2013-12-5':
         header = [
             'rank', 'title', 'dist', 'sem', 'cinemas', 'screens',
             'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
@@ -68,6 +68,17 @@ def create_sessions(sessions, filename):
         df['sem'] = df['sem'].replace({'P': 1})
 
     # Third Season
+    elif datetime_month_week_file > '2014-05-3' and datetime_month_week_file <= '2015-05-5' and datetime_month_week_file != '2013-12-5':
+        header = [
+            'rank', 'title','original_title', 'dist', 'sem', 'cinemas', 'screens',
+            'gross_total', 'gross_delta', 'gross_cinema_mean', 'gross_screens_mean',
+            'admissions_total', 'admissions_delta', 'admissions_cinema_mean', 'admissions_screen_mean',
+            'amount_eur', 'spectators']
+        df = read_xlsx(filename, 'xls', skiprows=22, cols=header)
+        df['original_title'] = np.nan
+        df['sem'] = df['sem'].replace({'P': 1})
+
+    # Fourth Season
     elif datetime_month_week_file > '2015-05-5' and datetime_month_week_file <= '2016-12-4':
         header = [
             'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
@@ -77,7 +88,7 @@ def create_sessions(sessions, filename):
         df = read_xlsx(filename, 'xls', skiprows=16, cols=header)
         df['sem'] = df['sem'].replace({'P': 1})
 
-    # Fourth Season
+    # Fifth Season
     elif datetime_month_week_file > '2016-12-4':
         header = [
             'rank', 'title', 'original_title', 'dist', 'sem', 'cinemas', 'screens',
