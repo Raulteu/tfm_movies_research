@@ -124,7 +124,6 @@ def create_sessions(sessions, filename):
             "spectators",
         ]
         df = read_xlsx(filename, "xls", skiprows=22, cols=header)
-        df["original_title"] = np.nan
         df["sem"] = df["sem"].replace({"P": 1})
 
     # Fourth Season
