@@ -8,7 +8,7 @@ import collections
 
 
 processed_data_path = os.path.abspath(
-    os.path.join(os.getcwd(), os.pardir, "data", "processed")
+    os.path.join(os.getcwd(), os.pardir, "data_box_office", "processed")
 )
 
 ############################
@@ -257,6 +257,13 @@ def set_imdb_info(row):
                 ]
             else:
                 row[feature] = []
+
+        print()
+        if 'box office' in movie.keys() and 'Budget' in movie['box office'].keys():
+            row['budget'] = movie['box office']['Budget'].replace('(estimated)','').strip()
+        else:
+            row['budget'] = None
+        
     except:
         pass
 
@@ -352,7 +359,7 @@ if __name__ == "__main__":
     try:
         if len(sys.argv) != 2:
             raise Exception(
-                "[ERROR] Incorrect Args : python process_data.py <absolute_filename_path>"
+                "[ERROR] Incorrect Args : python process_data_box_office.py <absolute_filename_path>"
             )
         generate_processed_files(sys.argv[1])
     except Exception as e:

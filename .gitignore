@@ -4,4 +4,4 @@
 *.docx
 *.DS_Store
 *.idea
-data/*
+data_*

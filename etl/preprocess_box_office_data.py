@@ -6,9 +6,9 @@ import shutil
 
 def generate_interim_files():
 
-    raw_data_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir, "data", "raw"))
+    raw_data_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir, "data_box_office", "raw"))
     interim_data_path = os.path.abspath(
-        os.path.join(os.getcwd(), os.pardir, "data", "interim")
+        os.path.join(os.getcwd(), os.pardir, "data_box_office", "interim")
     )
     months_map = {
         "enero": "01",
