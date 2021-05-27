@@ -16,4 +16,4 @@ last_year=$(( $year - 1 ))
 
 python process_geographical_data.py "$file"
 
-mongoimport --db db_movies --collection provinces --file ../data_geographical/processed/json/province_"$year"_"$last_year".json --jsonArray --upsert
+mongoimport --db db_movies --collection provinces --file ../data/data_geographical/processed/json/province_"$year"_"$last_year".json --jsonArray --upsert

@@ -8,7 +8,7 @@ import collections
 
 
 processed_data_path = os.path.abspath(
-    os.path.join(os.getcwd(), os.pardir, "data_box_office", "processed")
+    os.path.join(os.getcwd(), os.pardir, "data", "data_box_office", "processed")
 )
 
 ############################
