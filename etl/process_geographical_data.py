@@ -59,6 +59,11 @@ def generate_geographical_data(filename):
     df['gross_total'] = df['gross_total'].astype(float)
     df['admissions_total'] = df['admissions_total'].astype(float)
     
+    if year == 2016:
+        #TO avoid leading ceros xlsx bad format file
+        df['gross_total'] = df['gross_total'] / 10
+        df['admissions_total'] = df ['admissions_total'] / 10
+
     export_files_to_csv(df,year,last_year)
     export_files_to_json(df, year, last_year)
 
