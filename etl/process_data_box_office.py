@@ -5,7 +5,11 @@ import pandas as pd
 import numpy as np
 from imdb import IMDb
 import collections
-
+from bs4 import BeautifulSoup as BS
+import urllib
+import re
+import warnings
+warnings.filterwarnings("ignore")
 
 processed_data_path = os.path.abspath(
     os.path.join(os.getcwd(), os.pardir, "data", "data_box_office", "processed")
@@ -243,6 +247,7 @@ def set_imdb_info(row):
         row["_id"] = id
         row["id_imdb"] = id
         row["url"] = "https://www.imdb.com/title/tt" + id
+        row["stars"] = add_stars(row["url"])
 
         for feature in standard_features:
             if feature in movie.keys():
@@ -266,9 +271,32 @@ def set_imdb_info(row):
         
     except:
         pass
-
     return row
 
+
+def add_stars(url):
+    """ 
+    Given a url, download the html file from IMDB and apply scarpping to find cast stars.
+    :param url: String
+    :return stars: List
+    """
+
+    fp = urllib.request.urlopen(url)
+    mybytes = fp.read()
+
+    html = mybytes.decode("utf8")
+    fp.close()
+
+    soup = BS(html)
+
+    stars = set()
+
+    for litag in soup.find_all('li',{'class': 'ipc-metadata-list__item ipc-metadata-list-item--link', 'role' : 'presentation','data-testid':'title-pc-principal-credit'} ):
+        for stars_html in litag.find_all('li',{'class': 'ipc-inline-list__item', 'role' : 'presentation'}):
+            stars.add(re.sub(r"\([^()]*\)", "", stars_html.text))
+
+    stars = list(stars)
+    return stars
 
 def create_movies(sessions):
     """

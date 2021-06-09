@@ -1,0 +1,8 @@
+version: '3'
+services:
+  database:
+    image: 'mongo:4.2.2'
+    container_name: mongodb_movies
+    ports:
+      - '27017-27019:27017-27019'
+    restart: unless-stopped
