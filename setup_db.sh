@@ -7,6 +7,12 @@
 box_office_path="data/data_box_office/processed/json/"
 geographical_path="data/data_geographical/processed/json/"
 
+#####################
+### Run container ###
+#####################
+
+docker-compose up -d
+
 #####################################
 #####    Load Box office Data   #####
 #####################################
