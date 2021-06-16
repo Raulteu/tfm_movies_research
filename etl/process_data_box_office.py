@@ -106,6 +106,7 @@ def create_sessions(sessions, filename):
     # Third Season
     elif (
         datetime_month_week_file > "2014-05-3"
+        and datetime_month_week_file != "2014-05-5"
         and datetime_month_week_file <= "2015-05-5"
     ):
         header = [
