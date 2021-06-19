@@ -22,7 +22,7 @@ for file in $(ls "$box_office_path"); do
     fi
 
     if [[ $file == *"sessions"* ]]; then
-        mongoimport --db db_movies --collection sessions --file data/data_geographical/processed/json/"$file" --jsonArray --upsert
+        mongoimport --db db_movies --collection sessions --file data/data_box_office/processed/json/"$file" --jsonArray --upsert
     fi
 done
 

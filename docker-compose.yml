@@ -3,6 +3,8 @@ services:
   database:
     image: 'mongo:4.2.2'
     container_name: mongodb_movies
+    volumes:
+      - ./mongo:/data/db
     ports:
       - '27017-27019:27017-27019'
     restart: unless-stopped

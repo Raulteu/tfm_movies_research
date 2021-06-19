@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pandas = "==1.1.5"
+pandas = "==1.2.0"
 numpy = "==1.19.5"
 boto3 = "==1.14.12"
 IMDbPY = "==2020.09.25"
