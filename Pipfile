@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pandas = "==1.2.0"
+numpy = "==1.19.5"
+boto3 = "==1.14.12"
+IMDbPY = "==2020.09.25"
+beautifulsoup4 = "==4.9.3"
+xlrd = "==1.2.0"
+
+[dev-packages]
+
+[requires]
+python_version = "3"

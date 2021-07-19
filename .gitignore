@@ -1,0 +1,8 @@
+*.xls
+*.xlsx
+*.doc
+*.docx
+*.DS_Store
+*.idea
+data_*
+mongo/*
